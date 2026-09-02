@@ -50,7 +50,7 @@ export default function AdminLayoutClient({ children, user }: { children: React.
         {/* Header da Sidebar */}
         <div style={{ padding: '1.25rem 1.25rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ background: 'var(--red)', width: 36, height: 36, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', flexShrink: 0 }}>🏢</div>
+            <img src="/logo.png" alt="My Smart Living" style={{ height: 38, width: 'auto', background: 'white', padding: '3px 6px', borderRadius: 6, objectFit: 'contain' }} />
             <div>
               <div style={{ color: 'white', fontWeight: 800, fontSize: '0.9rem', lineHeight: 1.2 }}>My Smart Living</div>
               <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.7rem' }}>Painel Administrativo</div>

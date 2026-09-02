@@ -21,7 +21,7 @@ function LoginContent() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--navy-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ background: 'white', borderRadius: 20, padding: '2.5rem 2rem', maxWidth: 400, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', textAlign: 'center' }}>
-        <div style={{ background: 'var(--navy)', width: 60, height: 60, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '1.75rem' }}>🏢</div>
+        <img src="/logo.png" alt="My Smart Living" style={{ height: 60, width: 'auto', margin: '0 auto 1.5rem', display: 'block', objectFit: 'contain' }} />
         <h1 style={{ color: 'var(--navy)', fontSize: '1.375rem', fontWeight: 800, marginBottom: '0.375rem' }}>My Smart Living</h1>
         <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem', marginBottom: '2rem' }}>Painel Administrativo</p>
 

@@ -319,7 +319,7 @@ export default function CadastroPage() {
       <div style={{ background: 'var(--navy)', padding: '1.5rem 2rem', boxShadow: '0 2px 12px rgba(0,0,0,0.15)' }}>
         <div style={{ maxWidth: 740, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ background: 'var(--red)', width: 44, height: 44, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0 }}>🏢</div>
+            <img src="/logo.png" alt="My Smart Living Logo" style={{ height: 48, width: 'auto', borderRadius: 6, objectFit: 'contain', background: 'white', padding: '4px 8px' }} />
             <div>
               <h1 style={{ color: 'white', fontSize: '1.125rem', fontWeight: 800, lineHeight: 1.2 }}>{investidor?.condominios?.nome || 'CONDOMÍNIO VERSA LOFT STYLE'}</h1>
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}>{investidor?.condominios?.subtitulo_administracao || 'Sindicância & Administração: My Smart Living & Kato Condomínios'}</p>
