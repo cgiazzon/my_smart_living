@@ -407,7 +407,7 @@ export default function CadastroPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <div>
                       <label className="form-label">Telefone Celular / WhatsApp *</label>
-                      <input className={`form-input${errors.whatsapp ? ' error' : ''}`} value={whatsapp} onChange={e => setWhatsapp(formatPhone(e.target.value))} placeholder="(34) 99999-0000" maxLength={15} />
+                      <input className={`form-input${errors.whatsapp ? ' error' : ''}`} value={whatsapp} onChange={e => setWhatsapp(formatPhone(e.target.value))} placeholder="(00)0000-0000" maxLength={15} />
                       {errors.whatsapp && <p className="form-error">{errors.whatsapp}</p>}
                     </div>
                     <div>
@@ -425,11 +425,11 @@ export default function CadastroPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
                     <div>
                       <label className="form-label">Cidade / UF</label>
-                      <input className="form-input" value={cidadeUf} onChange={e => setCidadeUf(e.target.value)} placeholder="Uberlândia / MG" />
+                      <input className="form-input" value={cidadeUf} onChange={e => setCidadeUf(e.target.value)} placeholder="Cidade / UF" />
                     </div>
                     <div>
                       <label className="form-label">CEP</label>
-                      <input className={`form-input${errors.cep ? ' error' : ''}`} value={cep} onChange={e => setCep(formatCep(e.target.value))} placeholder="38400-000" maxLength={9} />
+                      <input className={`form-input${errors.cep ? ' error' : ''}`} value={cep} onChange={e => setCep(formatCep(e.target.value))} placeholder="00000-000" maxLength={9} />
                       {errors.cep && <p className="form-error">{errors.cep}</p>}
                     </div>
                   </div>
@@ -452,7 +452,7 @@ export default function CadastroPage() {
                       </div>
                       <div>
                         <label className="form-label">Telefone do Representante</label>
-                        <input className="form-input" value={pjRepresentanteTelefone} onChange={e => setPjRepresentanteTelefone(formatPhone(e.target.value))} placeholder="(34) 99999-0000" maxLength={15} />
+                        <input className="form-input" value={pjRepresentanteTelefone} onChange={e => setPjRepresentanteTelefone(formatPhone(e.target.value))} placeholder="(00)0000-0000" maxLength={15} />
                       </div>
                     </div>
                   </div>
@@ -481,7 +481,7 @@ export default function CadastroPage() {
                       </div>
                       <div>
                         <label className="form-label">Telefone do Coproprietário</label>
-                        <input className="form-input" value={coproprietarioTelefone} onChange={e => setCoproprietarioTelefone(formatPhone(e.target.value))} placeholder="(34) 99999-0000" maxLength={15} />
+                        <input className="form-input" value={coproprietarioTelefone} onChange={e => setCoproprietarioTelefone(formatPhone(e.target.value))} placeholder="(00)0000-0000" maxLength={15} />
                       </div>
                     </div>
                   </div>
@@ -514,7 +514,7 @@ export default function CadastroPage() {
                     </div>
                     <div>
                       <label className="form-label">Telefone / WhatsApp</label>
-                      <input className="form-input" value={interlocutorTelefone} onChange={e => setInterlocutorTelefone(formatPhone(e.target.value))} placeholder="(34) 99999-0000" maxLength={15} />
+                      <input className="form-input" value={interlocutorTelefone} onChange={e => setInterlocutorTelefone(formatPhone(e.target.value))} placeholder="(00)0000-0000" maxLength={15} />
                     </div>
                   </div>
                 )}
