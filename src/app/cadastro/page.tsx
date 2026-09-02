@@ -15,7 +15,18 @@ type Investidor = {
   condominio_id: string
   numero_venda: string
   apto: string
-  condominios?: { nome: string }
+  condominios?: {
+    nome: string
+    subtitulo_administracao: string
+    previsao_entrega: string
+    data_limite_devolucao: string
+    email_suporte: string
+    telefone_suporte: string
+    whatsapp_suporte: string
+    nome_dpo: string
+    email_dpo: string
+    telefone_dpo: string
+  }
 }
 
 type FormErrors = Record<string, string>
@@ -310,8 +321,8 @@ export default function CadastroPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{ background: 'var(--red)', width: 44, height: 44, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0 }}>🏢</div>
             <div>
-              <h1 style={{ color: 'white', fontSize: '1.125rem', fontWeight: 800, lineHeight: 1.2 }}>CONDOMÍNIO VERSA LOFT STYLE</h1>
-              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}>Sindicância & Administração: My Smart Living & Kato Condomínios</p>
+              <h1 style={{ color: 'white', fontSize: '1.125rem', fontWeight: 800, lineHeight: 1.2 }}>{investidor?.condominios?.nome || 'CONDOMÍNIO VERSA LOFT STYLE'}</h1>
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}>{investidor?.condominios?.subtitulo_administracao || 'Sindicância & Administração: My Smart Living & Kato Condomínios'}</p>
             </div>
           </div>
         </div>
@@ -321,9 +332,16 @@ export default function CadastroPage() {
 
         {/* Banner de apresentação */}
         <div style={{ background: 'white', borderRadius: 16, padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid var(--gray-200)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--navy)', marginBottom: '0.5rem' }}>Cadastro e Mapeamento da Unidade</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <h2 style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--navy)' }}>Cadastro e Mapeamento da Unidade</h2>
+            {investidor?.condominios?.data_limite_devolucao && (
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#991B1B', background: '#FEF2F2', padding: '0.25rem 0.625rem', borderRadius: 20, border: '1px solid #FCA5A5' }}>
+                Devolver preenchido até {investidor.condominios.data_limite_devolucao}
+              </span>
+            )}
+          </div>
           <p style={{ fontSize: '0.875rem', color: 'var(--gray-700)', lineHeight: 1.6, marginBottom: '0.75rem' }}>
-            Prezado(a) proprietário(a), precisamos de duas coisas: seus dados de cadastro na administradora e uma leitura de como você pretende usar a unidade.
+            Prezado(a) proprietário(a), a entrega está prevista para <strong>{investidor?.condominios?.previsao_entrega || 'breve'}</strong>. Precisamos de duas coisas: seus dados de cadastro na administradora e uma leitura de como você pretende usar a unidade. Só isso — o resto a gente resolve com você ao longo do caminho.
           </p>
           <div style={{ background: 'rgba(27,58,107,0.04)', borderRadius: 10, padding: '0.875rem 1rem', borderLeft: '4px solid var(--navy)', fontSize: '0.8rem', color: 'var(--gray-700)', lineHeight: 1.5 }}>
             💡 <strong>Importante:</strong> Nada aqui é votação ou contratação obrigatória. É cadastro e mapeamento. Se você ainda não decidiu algum ponto, marque &quot;Ainda não decidi&quot;.

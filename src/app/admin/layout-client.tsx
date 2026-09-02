@@ -7,6 +7,8 @@ import type { User } from '@supabase/supabase-js'
 
 const navItems = [
   { href: '/admin',              label: 'Dashboard',      icon: '📊' },
+  { href: '/admin/disparos',     label: 'Hub de Disparos',icon: '🚀' },
+  { href: '/admin/condominios', label: 'Condomínios',    icon: '🏢' },
   { href: '/admin/importar',     label: 'Importar CSV',   icon: '📥' },
   { href: '/admin/configuracoes',label: 'Configurações',  icon: '⚙️' },
 ]
