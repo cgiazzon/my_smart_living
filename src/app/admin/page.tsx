@@ -4,6 +4,48 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { buildInvestidorLink, statusLabel, formatDate } from '@/lib/utils'
 
+type RespostaFull = {
+  id: string
+  nome_completo: string
+  cpf_cnpj: string
+  email: string
+  whatsapp: string
+  condominio: string
+  bloco: string
+  unidade: string
+  qtd_unidades: string
+  endereco_correspondencia: string
+  cidade_uf: string
+  cep: string
+  coproprietario_nome: string
+  coproprietario_cpf: string
+  coproprietario_telefone: string
+  pj_representante_nome: string
+  pj_representante_cpf: string
+  pj_representante_telefone: string
+  interlocutor_nome: string
+  interlocutor_telefone: string
+  destinacao_unidade: string
+  quem_administra: string
+  quem_administra_qual: string
+  como_mobiliar: string
+  como_mobiliar_fornecedor: string
+  mes_ano_pronta: string
+  mes_ano_observacao: string
+  quem_recebe_chaves: string
+  procurador_nome_telefone: string
+  pretende_obra: string
+  pretende_obra_qual: string
+  propostas_apoio: string[]
+  campo_sinalizar: string
+  quer_ligacao: string
+  melhor_dia_horario: string
+  lgpd_consentido: boolean
+  autoriza_contato: boolean
+  assinatura_timestamp: string
+  created_at: string
+}
+
 type Investidor = {
   id: string
   token_unico: string
@@ -15,6 +57,7 @@ type Investidor = {
   abriu_link_at: string | null
   lembrete_enviado_at: string | null
   condominios: { nome: string } | null
+  respostas?: RespostaFull[]
 }
 
 export default function AdminPage() {
@@ -27,11 +70,14 @@ export default function AdminPage() {
   const [search, setSearch] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
 
+  // Modal de detalhes
+  const [selectedResp, setSelectedResp] = useState<RespostaFull | null>(null)
+
   const load = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
       .from('investidores')
-      .select('*, condominios(nome)')
+      .select('*, condominios(nome), respostas(*)')
       .order('token_unico')
     const inv = (data || []) as Investidor[]
     setInvestidores(inv)
@@ -65,17 +111,38 @@ export default function AdminPage() {
   }
 
   const exportCsv = () => {
-    const header = ['Token', 'Nome', 'Email', 'WhatsApp', 'Condomínio', 'Apto', 'Status', 'Abriu Link', 'Lembrete Enviado']
-    const rows = investidores.map(i => [
-      i.token_unico, i.nome, i.email, i.whatsapp,
-      i.condominios?.nome || '', i.apto, i.status_envio,
-      i.abriu_link_at ? formatDate(i.abriu_link_at) : '',
-      i.lembrete_enviado_at ? formatDate(i.lembrete_enviado_at) : ''
-    ])
+    const header = [
+      'Token', 'Nome', 'CPF/CNPJ', 'Email', 'WhatsApp', 'Condomínio', 'Unidade', 'Status',
+      'Destinação', 'Quem Administra', 'Como Mobiliar', 'Mês Pronta', 'Quem Recebe Chaves',
+      'Pretende Obra', 'Apoio/Propostas', 'Campo Sinalizar', 'Quer Ligação', 'Data Resposta'
+    ]
+    const rows = investidores.map(i => {
+      const resp = i.respostas && i.respostas.length > 0 ? i.respostas[0] : null
+      return [
+        i.token_unico,
+        resp?.nome_completo || i.nome,
+        resp?.cpf_cnpj || '',
+        resp?.email || i.email,
+        resp?.whatsapp || i.whatsapp,
+        i.condominios?.nome || '',
+        i.apto,
+        i.status_envio,
+        resp?.destinacao_unidade || '',
+        resp?.quem_administra || '',
+        resp?.como_mobiliar || '',
+        resp?.mes_ano_pronta || '',
+        resp?.quem_recebe_chaves || '',
+        resp?.pretende_obra || '',
+        (resp?.propostas_apoio || []).join('; '),
+        resp?.campo_sinalizar || '',
+        resp?.quer_ligacao || '',
+        resp?.created_at ? formatDate(resp.created_at) : ''
+      ]
+    })
     const csv = [header, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n')
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = 'investidores_msl.csv'; a.click()
+    const a = document.createElement('a'); a.href = url; a.download = 'mapeamento_investidores_versa.csv'; a.click()
   }
 
   const sendReminder = async (inv: Investidor) => {
@@ -93,11 +160,11 @@ export default function AdminPage() {
       {/* Header */}
       <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--navy)' }}>Dashboard</h1>
-          <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem' }}>Acompanhamento de cadastros — My Smart Living</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--navy)' }}>Dashboard — Versa Loft</h1>
+          <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem' }}>Mapeamento e cadastro de investidores</p>
         </div>
         <button onClick={exportCsv} className="btn-secondary">
-          📤 Exportar CSV
+          📤 Exportar CSV Completo
         </button>
       </div>
 
@@ -163,7 +230,7 @@ export default function AdminPage() {
       {/* Tabela */}
       <div style={{ background: 'white', borderRadius: 12, border: '1px solid var(--gray-200)', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--gray-500)' }}>Carregando...</div>
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--gray-500)' }}>Carregando dados...</div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
@@ -171,16 +238,16 @@ export default function AdminPage() {
                 <tr>
                   <th>Token</th>
                   <th>Nome</th>
-                  <th>Condomínio</th>
-                  <th>Apto</th>
+                  <th>Unidade</th>
                   <th>Status</th>
-                  <th>Abriu Link</th>
+                  <th>Mapeamento</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(inv => {
                   const s = statusLabel(inv.status_envio)
+                  const resp = inv.respostas && inv.respostas.length > 0 ? inv.respostas[0] : null
                   return (
                     <tr key={inv.id}>
                       <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--navy)', fontSize: '0.8rem' }}>{inv.token_unico}</td>
@@ -188,21 +255,28 @@ export default function AdminPage() {
                         <div>{inv.nome}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', fontWeight: 400 }}>{inv.email}</div>
                       </td>
-                      <td>{inv.condominios?.nome || '—'}</td>
-                      <td>{inv.apto}</td>
+                      <td>Unidade {inv.apto}</td>
                       <td>
                         <span className="status-badge" style={{ background: s.color.includes('emerald') ? 'rgba(16,185,129,0.1)' : s.color.includes('blue') ? 'rgba(59,130,246,0.1)' : s.color.includes('orange') ? 'rgba(245,158,11,0.1)' : 'rgba(107,114,128,0.1)', color: s.color.includes('emerald') ? '#059669' : s.color.includes('blue') ? '#2563EB' : s.color.includes('orange') ? '#D97706' : '#6B7280', borderColor: s.color.includes('emerald') ? 'rgba(16,185,129,0.3)' : s.color.includes('blue') ? 'rgba(59,130,246,0.3)' : s.color.includes('orange') ? 'rgba(245,158,11,0.3)' : 'rgba(107,114,128,0.3)' }}>
                           {s.emoji} {s.label}
                         </span>
                       </td>
-                      <td style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>{formatDate(inv.abriu_link_at)}</td>
+                      <td>
+                        {resp ? (
+                          <button onClick={() => setSelectedResp(resp)} className="btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', background: 'rgba(27,58,107,0.06)' }}>
+                            👁️ Ver Respostas Ficha
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>Aguardando</span>
+                        )}
+                      </td>
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button onClick={() => copyLink(inv.token_unico)} className="btn-secondary" style={{ padding: '0.375rem 0.625rem', fontSize: '0.75rem' }}>
-                            {copied === inv.token_unico ? '✅' : '🔗'} {copied === inv.token_unico ? 'Copiado!' : 'Link'}
+                          <button onClick={() => copyLink(inv.token_unico)} className="btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}>
+                            {copied === inv.token_unico ? '✅ Copiado' : '🔗 Link'}
                           </button>
                           {inv.status_envio !== 'respondeu' && (
-                            <button onClick={() => sendReminder(inv)} className="btn-secondary" style={{ padding: '0.375rem 0.625rem', fontSize: '0.75rem' }}>
+                            <button onClick={() => sendReminder(inv)} className="btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}>
                               📧 Lembrete
                             </button>
                           )}
@@ -211,14 +285,87 @@ export default function AdminPage() {
                     </tr>
                   )
                 })}
-                {filtered.length === 0 && (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--gray-500)' }}>Nenhum investidor encontrado.</td></tr>
-                )}
               </tbody>
             </table>
           </div>
         )}
       </div>
+
+      {/* Modal de Detalhes da Ficha Completa */}
+      {selectedResp && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={() => setSelectedResp(null)}>
+          <div style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 700, maxHeight: '90vh', overflowY: 'auto', padding: '2rem', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--gray-200)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--navy)' }}>Ficha de Mapeamento — Unidade {selectedResp.unidade}</h2>
+                <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>Preenchido em: {formatDate(selectedResp.created_at)}</p>
+              </div>
+              <button onClick={() => setSelectedResp(null)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--gray-500)' }}>✕</button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.875rem' }}>
+              {/* Parte 1 */}
+              <div style={{ background: 'var(--gray-100)', padding: '1rem', borderRadius: 10 }}>
+                <h3 style={{ fontWeight: 700, color: 'var(--navy)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>PARTE 1 — Dados Cadastrais</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div><strong>Nome:</strong> {selectedResp.nome_completo}</div>
+                  <div><strong>CPF/CNPJ:</strong> {selectedResp.cpf_cnpj}</div>
+                  <div><strong>E-mail:</strong> {selectedResp.email}</div>
+                  <div><strong>WhatsApp:</strong> {selectedResp.whatsapp}</div>
+                  <div><strong>Cidade/UF:</strong> {selectedResp.cidade_uf || '—'}</div>
+                  <div><strong>CEP:</strong> {selectedResp.cep || '—'}</div>
+                  {selectedResp.coproprietario_nome && (
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <strong>Coproprietário:</strong> {selectedResp.coproprietario_nome} ({selectedResp.coproprietario_cpf}) — Tel: {selectedResp.coproprietario_telefone}
+                    </div>
+                  )}
+                  {selectedResp.interlocutor_nome && (
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <strong>Interlocutor Oficial:</strong> {selectedResp.interlocutor_nome} — Tel: {selectedResp.interlocutor_telefone}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Parte 2 */}
+              <div style={{ background: 'var(--gray-100)', padding: '1rem', borderRadius: 10 }}>
+                <h3 style={{ fontWeight: 700, color: 'var(--navy)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>PARTE 2 — Mapeamento Operacional</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div><strong>1. Destinação:</strong> {selectedResp.destinacao_unidade}</div>
+                  <div><strong>2. Administração:</strong> {selectedResp.quem_administra} {selectedResp.quem_administra_qual ? `(${selectedResp.quem_administra_qual})` : ''}</div>
+                  <div><strong>3. Mobilia:</strong> {selectedResp.como_mobiliar} {selectedResp.como_mobiliar_fornecedor ? `(Fornecedor: ${selectedResp.como_mobiliar_fornecedor})` : ''}</div>
+                  <div><strong>4. Pronta em:</strong> {selectedResp.mes_ano_pronta || 'Não informado'} {selectedResp.mes_ano_observacao ? `(${selectedResp.mes_ano_observacao})` : ''}</div>
+                  <div><strong>5. Recebe Chaves/Vistoria:</strong> {selectedResp.quem_recebe_chaves} {selectedResp.procurador_nome_telefone ? `(Procurador: ${selectedResp.procurador_nome_telefone})` : ''}</div>
+                  <div><strong>6. Pretende Obra (NBR 16280):</strong> {selectedResp.pretende_obra} {selectedResp.pretende_obra_qual ? `(${selectedResp.pretende_obra_qual})` : ''}</div>
+                  <div><strong>7. Propostas de Apoio Solicitadas:</strong> {(selectedResp.propostas_apoio || []).join(', ') || 'Nenhuma'}</div>
+                  {selectedResp.campo_sinalizar && (
+                    <div style={{ marginTop: '0.5rem', background: 'white', padding: '0.75rem', borderRadius: 8, border: '1px solid var(--gray-200)' }}>
+                      <strong>8. Campo de Sinalização / Dúvidas:</strong><br />
+                      {selectedResp.campo_sinalizar}
+                    </div>
+                  )}
+                  <div><strong>9. Quer Ligação?</strong> {selectedResp.quer_ligacao} {selectedResp.melhor_dia_horario ? `(Horário: ${selectedResp.melhor_dia_horario})` : ''}</div>
+                </div>
+              </div>
+
+              {/* Parte 3 */}
+              <div style={{ background: 'var(--gray-100)', padding: '1rem', borderRadius: 10 }}>
+                <h3 style={{ fontWeight: 700, color: 'var(--navy)', marginBottom: '0.75rem', fontSize: '0.9rem' }}>PARTE 3 — Declarações & LGPD</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div><strong>Declaração Regulamento Kato/Versa:</strong> {selectedResp.lgpd_consentido ? '✅ Aceito' : '❌ Não'}</div>
+                  <div><strong>Autorização Propostas Comerciais (12 meses):</strong> {selectedResp.autoriza_contato ? '✅ Autorizado' : '❌ Não autorizado'}</div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
+              <button className="btn-primary" onClick={() => setSelectedResp(null)} style={{ maxWidth: 120 }}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
