@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { formatCpfCnpj, formatPhone, isCnpj, isValidCpf, isValidCnpj, isValidEmail } from '@/lib/utils'
+import { formatCpfCnpj, formatPhone, formatCep, isCnpj, isValidCpf, isValidCnpj, isValidEmail, isValidCep } from '@/lib/utils'
 
 type Investidor = {
   id: string
@@ -152,6 +152,10 @@ export default function CadastroPage() {
       errs.whatsapp = 'Telefone/WhatsApp é obrigatório'
     } else if (phoneDigits.length < 10) {
       errs.whatsapp = 'Telefone/WhatsApp deve ter DDD + número'
+    }
+
+    if (cep.trim() && !isValidCep(cep)) {
+      errs.cep = 'CEP inválido (deve conter 8 dígitos — ex: 38400-000)'
     }
 
     if (!condominioId) errs.condominioId = 'Selecione o condomínio'
@@ -425,7 +429,8 @@ export default function CadastroPage() {
                     </div>
                     <div>
                       <label className="form-label">CEP</label>
-                      <input className="form-input" value={cep} onChange={e => setCep(e.target.value)} placeholder="38400-000" />
+                      <input className={`form-input${errors.cep ? ' error' : ''}`} value={cep} onChange={e => setCep(formatCep(e.target.value))} placeholder="38400-000" maxLength={9} />
+                      {errors.cep && <p className="form-error">{errors.cep}</p>}
                     </div>
                   </div>
                 </div>

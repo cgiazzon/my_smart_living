@@ -21,6 +21,16 @@ export function formatPhone(value: string): string {
   return digits.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3')
 }
 
+export function formatCep(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+  return digits.replace(/(\d{5})(\d{0,3})/, '$1-$2').replace(/-$/, '')
+}
+
+export function isValidCep(cep: string): boolean {
+  const digits = cep.replace(/\D/g, '')
+  return digits.length === 8
+}
+
 export function isCnpj(value: string): boolean {
   const digits = value.replace(/\D/g, '')
   return digits.length > 11
