@@ -23,9 +23,6 @@ type Investidor = {
     email_suporte: string
     telefone_suporte: string
     whatsapp_suporte: string
-    nome_dpo: string
-    email_dpo: string
-    telefone_dpo: string
   }
 }
 

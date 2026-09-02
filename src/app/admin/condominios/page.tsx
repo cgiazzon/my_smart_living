@@ -12,9 +12,6 @@ type Condominio = {
   email_suporte: string
   telefone_suporte: string
   whatsapp_suporte: string
-  nome_dpo: string
-  email_dpo: string
-  telefone_dpo: string
 }
 
 export default function CondominiosPage() {
@@ -51,9 +48,6 @@ export default function CondominiosPage() {
         email_suporte: editingCond.email_suporte,
         telefone_suporte: editingCond.telefone_suporte,
         whatsapp_suporte: editingCond.whatsapp_suporte,
-        nome_dpo: editingCond.nome_dpo,
-        email_dpo: editingCond.email_dpo,
-        telefone_dpo: editingCond.telefone_dpo,
       })
       .eq('id', editingCond.id)
 
@@ -117,7 +111,6 @@ export default function CondominiosPage() {
                 <div><strong>Data Limite Devolução:</strong><br />{cond.data_limite_devolucao || '—'}</div>
                 <div><strong>Suporte E-mail:</strong><br />{cond.email_suporte || '—'}</div>
                 <div><strong>Suporte WhatsApp:</strong><br />{cond.whatsapp_suporte || '—'}</div>
-                <div><strong>Encarregado DPO:</strong><br />{cond.nome_dpo || '—'} ({cond.email_dpo || '—'})</div>
               </div>
             </div>
           ))}
@@ -160,24 +153,6 @@ export default function CondominiosPage() {
                 <div>
                   <label className="form-label">WhatsApp Suporte Dúvidas</label>
                   <input className="form-input" value={editingCond.whatsapp_suporte || ''} onChange={e => setEditingCond({ ...editingCond, whatsapp_suporte: e.target.value })} />
-                </div>
-              </div>
-
-              <div style={{ borderTop: '1px solid var(--gray-200)', paddingTop: '1rem', marginTop: '0.5rem' }}>
-                <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--navy)', marginBottom: '0.75rem' }}>Informações do Encarregado LGPD (DPO)</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label className="form-label">Nome DPO</label>
-                    <input className="form-input" value={editingCond.nome_dpo || ''} onChange={e => setEditingCond({ ...editingCond, nome_dpo: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="form-label">E-mail DPO</label>
-                    <input className="form-input" value={editingCond.email_dpo || ''} onChange={e => setEditingCond({ ...editingCond, email_dpo: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="form-label">Telefone DPO</label>
-                    <input className="form-input" value={editingCond.telefone_dpo || ''} onChange={e => setEditingCond({ ...editingCond, telefone_dpo: e.target.value })} />
-                  </div>
                 </div>
               </div>
 
