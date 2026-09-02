@@ -11,10 +11,15 @@ const navItems = [
   { href: '/admin/configuracoes',label: 'Configurações',  icon: '⚙️' },
 ]
 
-export default function AdminLayoutClient({ children, user }: { children: React.ReactNode; user: User }) {
+export default function AdminLayoutClient({ children, user }: { children: React.ReactNode; user: User | null }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+
+  // Se a rota for a tela de login, renderiza apenas o formulário de login sem a barra lateral admin
+  if (pathname === '/admin/login') {
+    return <>{children}</>
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -47,7 +52,7 @@ export default function AdminLayoutClient({ children, user }: { children: React.
 
         <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', marginBottom: '0.625rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {user.email}
+            {user?.email || 'Usuário'}
           </div>
           <button onClick={handleLogout} style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s' }}
             onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.12)')}

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { formatCpfCnpj, formatWhatsApp, isCnpj } from '@/lib/utils'
+import { formatCpfCnpj, formatPhone, isCnpj, isValidCpf, isValidCnpj, isValidEmail } from '@/lib/utils'
 
 const SERVICOS = [
   { id: 'lavanderia',        label: 'Lavanderia',              icon: '🧺' },
@@ -54,7 +54,6 @@ export default function CadastroPage() {
   const [servicos, setServicos] = useState<string[]>([])
   const [lgpdConsentido, setLgpdConsentido] = useState(false)
   const [autorizaContato, setAutorizaContato] = useState(false)
-  const [assinatura, setAssinatura] = useState('')
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -71,9 +70,9 @@ export default function CadastroPage() {
       if (inv) {
         setInvestidor(inv)
         setNome(inv.nome || '')
-        setCpfCnpj(inv.cpf_cnpj || '')
+        setCpfCnpj(formatCpfCnpj(inv.cpf_cnpj || ''))
         setEmail(inv.email || '')
-        setWhatsapp(inv.whatsapp || '')
+        setWhatsapp(formatPhone(inv.whatsapp || ''))
         setCondominioId(inv.condominio_id || '')
         setUnidade(inv.apto || '')
 
@@ -95,14 +94,36 @@ export default function CadastroPage() {
   const validate = (): boolean => {
     const errs: FormErrors = {}
     if (!nome.trim()) errs.nome = 'Nome é obrigatório'
-    if (!cpfCnpj.trim()) errs.cpfCnpj = 'CPF/CNPJ é obrigatório'
-    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) errs.email = 'E-mail inválido'
-    if (!whatsapp.trim()) errs.whatsapp = 'WhatsApp é obrigatório'
+    
+    // Validação CPF / CNPJ
+    if (!cpfCnpj.trim()) {
+      errs.cpfCnpj = 'CPF/CNPJ é obrigatório'
+    } else if (isCnpj(cpfCnpj)) {
+      if (!isValidCnpj(cpfCnpj)) errs.cpfCnpj = 'CNPJ inválido'
+    } else {
+      if (!isValidCpf(cpfCnpj)) errs.cpfCnpj = 'CPF inválido'
+    }
+
+    // Validação E-mail
+    if (!email.trim()) {
+      errs.email = 'E-mail é obrigatório'
+    } else if (!isValidEmail(email)) {
+      errs.email = 'Insira um e-mail válido com @ (ex: nome@dominio.com)'
+    }
+
+    // Validação WhatsApp / Telefone
+    const phoneDigits = whatsapp.replace(/\D/g, '')
+    if (!whatsapp.trim()) {
+      errs.whatsapp = 'WhatsApp é obrigatório'
+    } else if (phoneDigits.length < 10) {
+      errs.whatsapp = 'Telefone/WhatsApp deve ter DDD + número'
+    }
+
     if (!condominioId) errs.condominioId = 'Selecione o condomínio'
     if (!unidade.trim()) errs.unidade = 'Número da unidade é obrigatório'
     if (!statusUnidade) errs.statusUnidade = 'Selecione o status da unidade'
     if (!lgpdConsentido) errs.lgpd = 'Você precisa aceitar o tratamento de dados (LGPD)'
-    if (!assinatura.trim()) errs.assinatura = 'A assinatura eletrônica é obrigatória'
+    
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -128,7 +149,7 @@ export default function CadastroPage() {
       servicos_interesse: servicos,
       lgpd_consentido: lgpdConsentido,
       autoriza_contato: autorizaContato,
-      assinatura_eletronica: assinatura,
+      assinatura_eletronica: `Aceite digital de ${nome} (${cpfCnpj})`,
       assinatura_timestamp: agora,
     })
 
@@ -178,7 +199,7 @@ export default function CadastroPage() {
             Suas informações foram registradas com sucesso. Em breve nossa equipe entrará em contato.
           </p>
           <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--gray-100)', borderRadius: 10, fontSize: '0.85rem', color: 'var(--gray-500)' }}>
-            Assinado eletronicamente em {new Date().toLocaleString('pt-BR')}
+            Aceite termo LGPD registrado digitalmente em {new Date().toLocaleString('pt-BR')}
           </div>
         </div>
       </div>
@@ -242,7 +263,7 @@ export default function CadastroPage() {
                 </div>
                 <div>
                   <label className="form-label">WhatsApp *</label>
-                  <input className={`form-input${errors.whatsapp ? ' error' : ''}`} value={whatsapp} onChange={e => setWhatsapp(formatWhatsApp(e.target.value))} placeholder="(34) 99999-0000" />
+                  <input className={`form-input${errors.whatsapp ? ' error' : ''}`} value={whatsapp} onChange={e => setWhatsapp(formatPhone(e.target.value))} placeholder="(34) 99999-0000" maxLength={15} />
                   {errors.whatsapp && <p className="form-error">{errors.whatsapp}</p>}
                 </div>
               </div>
@@ -324,10 +345,10 @@ export default function CadastroPage() {
           <div className="form-card">
             <div className="section-title">
               <span className="section-badge">5</span>
-              Consentimento LGPD & Assinatura
+              Consentimento LGPD
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
               <div className={`lgpd-check${errors.lgpd ? '' : ''}`} style={{ border: errors.lgpd ? '1px solid var(--red)' : undefined }}>
                 <input type="checkbox" id="lgpd" checked={lgpdConsentido} onChange={e => setLgpdConsentido(e.target.checked)} style={{ width: 18, height: 18, marginTop: 2, flexShrink: 0, cursor: 'pointer', accentColor: 'var(--navy)' }} />
                 <label htmlFor="lgpd" style={{ fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--gray-700)', cursor: 'pointer' }}>
@@ -342,28 +363,6 @@ export default function CadastroPage() {
                   <strong style={{ color: 'var(--navy)' }}>Autorização de contato comercial (opcional):</strong> Autorizo a My Smart Living a me contatar por e-mail e WhatsApp com informações sobre novos serviços, promoções e atualizações do empreendimento.
                 </label>
               </div>
-            </div>
-
-            <div className="signature-box">
-              <label className="form-label" style={{ marginBottom: '0.625rem' }}>
-                Assinatura Eletrônica *
-                <span style={{ fontWeight: 400, color: 'var(--gray-500)', marginLeft: '0.5rem', fontSize: '0.8rem' }}>
-                  (digite seu nome completo para assinar)
-                </span>
-              </label>
-              <input
-                className={`form-input${errors.assinatura ? ' error' : ''}`}
-                value={assinatura}
-                onChange={e => setAssinatura(e.target.value)}
-                placeholder="Digite seu nome completo"
-                style={{ fontStyle: 'italic', fontWeight: 600 }}
-              />
-              {errors.assinatura && <p className="form-error">{errors.assinatura}</p>}
-              {assinatura && (
-                <div style={{ marginTop: '0.625rem', padding: '0.5rem 0.75rem', background: 'var(--gray-100)', borderRadius: 8, fontSize: '0.75rem', color: 'var(--gray-500)' }}>
-                  🕐 Assinado em: {new Date().toLocaleString('pt-BR')}
-                </div>
-              )}
             </div>
           </div>
 
