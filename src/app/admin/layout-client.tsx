@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -32,6 +33,12 @@ export default function AdminLayoutClient({ children, user }: { children: React.
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Fecha o menu mobile quando a rota muda
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
 
   // Se a rota for a tela de login, renderiza apenas o formulário de login sem a barra lateral admin
   if (pathname === '/admin/login') {
@@ -44,9 +51,32 @@ export default function AdminLayoutClient({ children, user }: { children: React.
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
-      <aside className="admin-sidebar" style={{ display: 'flex', flexDirection: 'column', width: 260 }}>
+    <div className="admin-container">
+      {/* Topbar Mobile */}
+      <header className="mobile-topbar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          <img src="/logo.png" alt="My Smart Living" style={{ height: 32, width: 'auto', background: 'white', padding: '2px 5px', borderRadius: 4, objectFit: 'contain' }} />
+          <span style={{ color: 'white', fontWeight: 800, fontSize: '0.9rem' }}>My Smart Living</span>
+        </div>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="mobile-hamburger-btn"
+          aria-label="Abrir Menu"
+        >
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
+      </header>
+
+      {/* Overlay Escuro para Mobile */}
+      {mobileMenuOpen && (
+        <div
+          className="mobile-backdrop"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar (Desktop + Drawer no Mobile) */}
+      <aside className={`admin-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         {/* Header da Sidebar */}
         <div style={{ padding: '1.25rem 1.25rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -92,7 +122,7 @@ export default function AdminLayoutClient({ children, user }: { children: React.
       </aside>
 
       {/* Main content */}
-      <main style={{ flex: 1, background: 'var(--gray-100)', overflow: 'auto' }}>
+      <main className="admin-main">
         {children}
       </main>
     </div>
